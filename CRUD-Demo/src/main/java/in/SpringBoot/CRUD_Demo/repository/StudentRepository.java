@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
+
 // Marks this class as a Spring Bean.
 // Spring creates an object of this class and manages its lifecycle.
 //
@@ -14,5 +17,9 @@ import org.springframework.stereotype.Repository;
 // @Repository is specifically meant for the persistence layer.
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
+
+    Optional<Student> findByIdAndDeletedIsFalse(Long id);
+
+    List<Student> findAllByDeletedFalse();
 
 }

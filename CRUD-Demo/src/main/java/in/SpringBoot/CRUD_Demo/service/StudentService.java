@@ -14,7 +14,7 @@ import java.util.Optional;
 @Service
 public class StudentService {
 
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
 
     @Autowired
@@ -24,23 +24,24 @@ public class StudentService {
 
 
     public Student createStudent(Student student) {
+        student.setDeleted(false);
         Student studentRes = studentRepository.save(student);
         return studentRes;
     }
 
     public Student getStudentById(Long id) {
-        Optional<Student> studentRes = studentRepository.findById(id);
+        Optional<Student> studentRes = studentRepository.findByIdAndDeletedIsFalse(id);
 
         return studentRes.orElse(null);
     }
 
     public List<Student> getAllStudents() {
-        List<Student> listRes = studentRepository.findAll();
+        List<Student> listRes = studentRepository.findAllByDeletedFalse();
         return listRes;
     }
 
     public Student updateStudentById(Long id, Student reqStudent) {
-        Optional<Student> existingStudent = studentRepository.findById(id);
+        Optional<Student> existingStudent = studentRepository.findByIdAndDeletedIsFalse(id);
 
         if(existingStudent.isEmpty()){
             return null;
@@ -63,6 +64,14 @@ public class StudentService {
             return false;
         }
         studentRepository.deleteById(id);
+        return true;
+    }
+
+    public Boolean softDeleteStudentById(Long id) {
+        Optional<Student> studentRes = studentRepository.findByIdAndDeletedIsFalse(id);
+        if(studentRes.isEmpty()){ return false;}
+        studentRes.get().setDeleted(true);
+        studentRepository.save(studentRes.get());
         return true;
     }
 }

@@ -1,12 +1,15 @@
 package in.SpringBoot.CRUD_Demo.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class Student {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private int rollNo;
@@ -14,6 +17,7 @@ public class Student {
     private int age;
     private String email;
     private String subject;
+    private Boolean deleted;
 
     public int getRollNo() {
         return rollNo;
@@ -61,5 +65,13 @@ public class Student {
 
     public void setSubject(String subject) {
         this.subject = subject;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 }
