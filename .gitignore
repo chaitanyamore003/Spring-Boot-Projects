@@ -1,9 +1,9 @@
 # IntelliJ
-../.idea/
+.idea/
 *.iml
 
 # Maven
-CRUD-Demo/target/
+target/
 
 # OS files
 .DS_Store
