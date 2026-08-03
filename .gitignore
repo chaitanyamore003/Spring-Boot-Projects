@@ -5,6 +5,15 @@
 # Maven
 target/
 
+# Embedded Tomcat
+tomcat.*/
+work/
+temp/
+
+# Logs
+*.log
+logs/
+
 # OS files
 .DS_Store
 Thumbs.db
