@@ -3,7 +3,7 @@
 *.iml
 
 # Maven
-target/
+CRUD-Demo/target/
 
 # OS files
 .DS_Store
