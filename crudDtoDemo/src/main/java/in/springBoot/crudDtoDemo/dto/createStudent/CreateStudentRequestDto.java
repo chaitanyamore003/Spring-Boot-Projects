@@ -4,21 +4,23 @@ import jakarta.validation.constraints.*;
 
 public class CreateStudentRequestDto {
 
-    @NotBlank(message = "Name cannot be Null")
-    @Size(min = 2, max = 50, message = "Student name must be within 2 to 50 characters long")
+    @NotBlank(message = "Name cannot be blank")
+    @Size(min = 2, max = 50, message = "Student name must be between 2 and 50 characters")
     private String name;
 
-    @Email(message = "Enter a valid Email Address")
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Enter a valid email address")
     private String email;
 
-    @NotEmpty(message = "Roll no cannot be Null")
+    @NotNull(message = "Roll number cannot be null")
+    @Positive(message = "Roll number must be positive")
     private Integer rollNo;
 
-    @NotBlank(message = "Subject must be defined")
+    @NotBlank(message = "Subject cannot be blank")
     private String subject;
 
     @NotNull(message = "Age cannot be null")
-    @Min(value = 18, message = "Age should be atleast 18")
+    @Min(value = 18, message = "Age must be at least 18")
     private Integer age;
 
     public String getName() {

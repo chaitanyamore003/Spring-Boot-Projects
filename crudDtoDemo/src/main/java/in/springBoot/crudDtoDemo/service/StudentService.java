@@ -5,9 +5,12 @@ import in.springBoot.crudDtoDemo.dto.createStudent.CreateStudentResponseDto;
 import in.springBoot.crudDtoDemo.dto.updateStudent.UpdateStudentRequestDto;
 import in.springBoot.crudDtoDemo.dto.updateStudent.UpdateStudentResponseDto;
 import in.springBoot.crudDtoDemo.entity.Student;
+import in.springBoot.crudDtoDemo.exception.DuplicateResourceException;
+import in.springBoot.crudDtoDemo.exception.ResourseNotFoundException;
 import in.springBoot.crudDtoDemo.repository.StudentRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -24,36 +27,23 @@ public class StudentService {
     // Adds a new student to the database.
     public CreateStudentResponseDto addStudent(CreateStudentRequestDto studentReq) {
 
-        // Convert request DTO into entity.
-        Student student = mapToEntity(studentReq);
+        if(emailExists(studentReq)){
+            throw new DuplicateResourceException("User with email " +  studentReq.getEmail() + " already exists");
+        }
 
-        // Save entity.
-        Student savedStudent = studentRepository.save(student);
-
-        // Convert entity into response DTO.
-        CreateStudentResponseDto response = mapToDto(savedStudent);
-        response.setMessage("Student successfully added");
-
+        Student studentToSave = mapToEntity(studentReq);
+        CreateStudentResponseDto response =  mapToDto(studentRepository.save(studentToSave));
         return response;
     }
 
     // Fetch student by ID.
     public CreateStudentResponseDto getStudent(Long id) {
 
-        Student student = studentRepository
+        Student studentRes = studentRepository
                 .findByIdAndDeletedIsFalse(id)
-                .orElse(null);
+                .orElseThrow(() -> new ResourseNotFoundException("Student with id " + id + " not found"));
 
-        if (student == null) {
-            CreateStudentResponseDto response = new CreateStudentResponseDto();
-            response.setMessage("Student not found");
-            return response;
-        }
-
-        CreateStudentResponseDto response = mapToDto(student);
-        response.setMessage("Student successfully found");
-
-        return response;
+        return  mapToDto(studentRes);
     }
 
     // Update an existing student.
@@ -62,13 +52,8 @@ public class StudentService {
 
         Student student = studentRepository
                 .findByIdAndDeletedIsFalse(id)
-                .orElse(null);
+                .orElseThrow(() -> new ResourseNotFoundException("Student with id " + id + " not found"));
 
-        if (student == null) {
-            UpdateStudentResponseDto response = new UpdateStudentResponseDto();
-            response.setMessage("Student not found");
-            return response;
-        }
 
         // Update editable fields.
         student.setName(studentReq.getName());
@@ -92,43 +77,28 @@ public class StudentService {
     }
 
     // Permanently delete a student.
-    public boolean deleteStudent(Long id) {
+    public void deleteStudent(Long id) {
 
-        Student student = studentRepository
+        Student studentToBeDeleted = studentRepository
                 .findByIdAndDeletedIsFalse(id)
-                .orElse(null);
+                .orElseThrow(() -> new ResourseNotFoundException("Student with id " + id + " not found"));
 
-        if (student == null) {
-            return false;
-        }
-
-        studentRepository.delete(student);
-        return true;
+       studentRepository.delete(studentToBeDeleted);
     }
 
     // Soft delete a student.
-    public boolean softDeleteStudent(Long id) {
+    public void softDeleteStudent(Long id) {
 
         Student student = studentRepository
                 .findByIdAndDeletedIsFalse(id)
-                .orElse(null);
-
-        if (student == null) {
-            return false;
-        }
+                .orElseThrow(() -> new ResourseNotFoundException("Student with id " + id + " not found"));
 
         student.setDeleted(true);
         studentRepository.save(student);
-
-        return true;
     }
 
     // Converts Entity into Create Response DTO.
     private CreateStudentResponseDto mapToDto(Student student) {
-
-        if (student == null) {
-            return null;
-        }
 
         CreateStudentResponseDto response = new CreateStudentResponseDto();
 
@@ -178,10 +148,19 @@ public class StudentService {
         student.setAge(studentReq.getAge());
         student.setRollNo(studentReq.getRollNo());
         student.setSubject(studentReq.getSubject());
+        student.setCreatedDate(LocalDate.now());
+        student.setUpdatedDate(LocalDate.now());
 
         // New students are active by default.
         student.setDeleted(false);
 
         return student;
+    }
+
+
+
+    //checking if Email Already Exists
+    private Boolean emailExists(CreateStudentRequestDto studentReq) {
+        return studentRepository.existsByEmail(studentReq.getEmail());
     }
 }
